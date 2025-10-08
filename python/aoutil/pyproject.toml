@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aoutil"
+version = "0.1.0"
+description = "basic util module for various things I find useful."
+authors = [{ name="Michael Mahoney", email="michael.mahoney@alphaomega.com.co" }]
+readme = "README.md"
+license = {file = "LICENSE"}
+dependencies = []

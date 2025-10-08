@@ -1,0 +1,7 @@
+# python ignores
+__pycache__
+temp
+build
+dist
+env
+*.log
