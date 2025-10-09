@@ -15,8 +15,20 @@ def detect_deltas(collection1: list|dict, collection2: list|dict, lookupKey: str
         errorIndicies = []
         for i in range(greaterLength):
             InnerLog, areSame = row_hash_comparison(collection1[i], collection2[i])
-            if InnerLog.has_errors:
+            Log.rollup_aolog(InnerLog)
+
+            if Log.has_errors:
                 errorIndicies.append(i)
+                continue
+            
+            elif areSame:
+                deltaIndicies.append(i)
+                continue
+            
+            else:
+                continue
+
+
 
 
 
