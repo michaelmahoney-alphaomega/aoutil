@@ -5,12 +5,13 @@ import  hashlib
 def delta_sync():
     pass
 
-def detect_deltas(collection1: list|dict, collection2: list|dict, lookupKey: str|None) -> tuple[aolog.AoLog, dict]:
+def detect_deltas(collection1: list|dict, collection2: list|dict, lookupKey: str|None, error_threshold: int = 10) -> tuple[aolog.AoLog, dict]:
     Log = aolog.AoLog()
     
     if isinstance(collection1, list) and isinstance(collection2, list):
         greaterLength = max(len(collection1), len(collection2))
-        lengthDifference = len(collection1) - len(collection2)
+        lesserLength = min(len(collection1), len(collection2))
+        lengthDifference = greaterLength - lesserLength
         deltaIndicies = []
         errorIndicies = []
         for i in range(greaterLength):
@@ -21,12 +22,17 @@ def detect_deltas(collection1: list|dict, collection2: list|dict, lookupKey: str
                 errorIndicies.append(i)
                 continue
             
-            elif areSame:
+            elif not areSame:
                 deltaIndicies.append(i)
                 continue
             
             else:
                 continue
+        
+        Log.log_info(f"There were {len(deltaIndicies)} deltas detected.")
+
+        if len(errorIndicies) > error_threshold:
+            Log.log_error(f"There were {len(errorIndicies)} errors detected. This is more than the provided threshold: {error_threshold}", "")
 
 
 
