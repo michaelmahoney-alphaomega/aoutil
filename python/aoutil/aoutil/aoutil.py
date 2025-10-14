@@ -2,10 +2,33 @@ import aolog
 import  hashlib
 
 
-def delta_sync():
-    pass
+def delta_sync(collection1: list|dict, collection2: list|dict, source_of_truth: int = 0, error_threshold: int = 10) -> tuple[aolog.AoLog, int]:
+    Log = aolog.AoLog()
+    changesMade = 0
+    InnerLog, errors, deltas = detect_deltas(collection1=collection1, collection2=collection2, error_threshold=error_threshold)
+    Log.rollup_aolog(InnerLog)
 
-def detect_deltas(collection1: list|dict, collection2: list|dict, lookupKey: str|None, error_threshold: int = 10) -> tuple[aolog.AoLog, list, list]:
+    if Log.has_errors:
+        pass
+
+    else:
+        pass
+
+    return Log, changesMade
+        
+        
+    
+
+def ajudicate_changes(collection1, collection2, deltas: list|dict, use_updated: bool, source_of_truth: int) -> tuple[aolog.AoLog, list|dict]:
+
+    if isinstance(collection1, list) and isinstance(collection2, list):
+        if source_of_truth == 0:
+            for index in deltas:
+                collection1[index]
+        
+    
+
+def detect_deltas(collection1: list|dict, collection2: list|dict, error_threshold: int = 10) -> tuple[aolog.AoLog, list, list]:
     Log = aolog.AoLog()
     deltas = []
     errors = []
