@@ -1,5 +1,5 @@
 import aolog
-import  hashlib
+import  hashlib, datetime
 
 
 def delta_sync(collection1: list|dict, collection2: list|dict, source_of_truth: int = 0, error_threshold: int = 10) -> tuple[aolog.AoLog, int]:
@@ -19,9 +19,36 @@ def delta_sync(collection1: list|dict, collection2: list|dict, source_of_truth: 
         
     
 
-def ajudicate_changes(collection1, collection2, deltas: list|dict, use_updated: bool, source_of_truth: int) -> tuple[aolog.AoLog, list|dict]:
+def ajudicate_changes(collection1, collection2, deltas: list, use_updated: bool, source_of_truth: int) -> tuple[aolog.AoLog, list|dict]:
+    Log = aolog.AoLog()
 
-    if isinstance(collection1, list) and isinstance(collection2, list):
+    if use_updated:
+        if not isinstance(collection1, dict) or not isinstance(collection2, dict):
+            Log.log_error(f"both 'collection1' and 'collection2' must be dicts in order to use the 'use_updated' param.", f"Provided types: collection1: {type(collection1)} -- collection2: {type(collection2)}")
+            pass
+
+        else:
+            ancientTime = datetime.datetime(2000, 1, 1)
+            for key in deltas:
+                col1Updated = collection1.get(key,{"updated": ancientTime}).get("updated", ancientTime) for key in deltas}
+                col2Updated = {key: collection2.get(key,{"updated": ancientTime}).get("updated", ancientTime) for key in deltas}
+            
+            updatedComparision = tuple(zip(col1Updated, col2Updated)) 
+
+            updates = []
+            errors = []
+            for datePair in updatedComparision:
+                if not isinstance(datePair[0], datetime.datetime) or not isinstance(datePair[1], datetime.datetime):
+                    Log.log_error(f"The values of the updated keys must be datetime.datetim objects. No decision will be made for this key", f"provided types: {type(datePair[0])} -- {type(datePair[1])}")
+                    errors.append()
+
+                if datePair[0]
+
+            updates = map(lambda x: 0 if x[0] > x[1] else 1, updatedComparision)
+
+
+
+    elif isinstance(collection1, list) and isinstance(collection2, list):
         if source_of_truth == 0:
             for index in deltas:
                 collection1[index]
