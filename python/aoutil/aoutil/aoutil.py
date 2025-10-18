@@ -2,9 +2,19 @@ import aolog
 import  hashlib, datetime
 
 
-def delta_sync(collection1: list|dict, collection2: list|dict, source_of_truth: int = 0, use_updated: bool = False, error_threshold: int = 10) -> tuple[aolog.AoLog, int]:
+def delta_sync(
+    collection1: list|dict, 
+    collection2: list|dict, 
+    source_of_truth: int = 0, 
+    use_updated: bool = False, 
+    error_threshold: int = 10, 
+    commit_changes: bool = True
+) -> tuple[aolog.AoLog, dict]:
+    """
+    """
+
     Log = aolog.AoLog()
-    changesMade = 0
+
     InnerLog, errors, deltas = detect_deltas(collection1=collection1, collection2=collection2, error_threshold=error_threshold)
     Log.rollup_aolog(InnerLog)
     
@@ -18,22 +28,20 @@ def delta_sync(collection1: list|dict, collection2: list|dict, source_of_truth: 
         source_of_truth = source_of_truth,
     )
     
-        
-
-    if Log.has_errors:
-        pass
-
+    if commit_changes:
+        for key, value in changes:
+            collection1[key] = value
+    
     else:
         pass
 
-    return Log, changesMade
+    return Log, changes
         
-        
-    
 
-def adjudicate_changes(deltas: list[tuple], use_updated: bool, source_of_truth: int) -> tuple[aolog.AoLog, list|dict]:
+        
+def adjudicate_changes(deltas: list[tuple], use_updated: bool, source_of_truth: int) -> tuple[aolog.AoLog, dict]:
     Log = aolog.AoLog()
-    mergedCollections = []
+    changes = {}
 
     if use_updated:
         if not isinstance(deltas[0][1], dict) or not isinstance(deltas[0][2], dict):
@@ -51,58 +59,56 @@ def adjudicate_changes(deltas: list[tuple], use_updated: bool, source_of_truth: 
                 row2Updated = row2.get("updated", ancientTime)
                 
                 if row1Updated >= row2Updated:
-                    mergedCollections.append({key: row1})
+                    changes[key] = row1
                 
                 elif row1Updated < row2Updated:
-                    mergedCollections.append({key: {row2}})
+                    changes[key] = row2
                 
                 else:
-                    Log.log_error(f"something went wrong when trying to compare the updated fields from the collections.", f"Time1: {row1Updated} -- Time2: {row2Updated}")
+                    Log.log_error(f"something went wrong when trying to compare the updated fields from the collections. Going with the default source of truth.", f"Time1: {row1Updated} -- Time2: {row2Updated}")
                     if source_of_truth == 1:
-                        mergedCollections.append({key: row1})
+                        changes[key] = row1
                     
                     elif source_of_truth == 2:
-                        mergedCollections.append({key: {row2}})
+                        changes[key] = row2
                     
                     else:
                         pass
-                
-                        
-                        
 
+    elif isinstance(deltas[0][1], dict) and isinstance(deltas[0][2], dict):
+        for change_row in deltas:
+            key = change_row[0]
+            row1 = change_row[1]
+            row2 = change_row[2]
 
-                
-
-                
-                recent = max(col2Updated[1], col1Updated[1])
-                
-                
-
-
-                
+            if source_of_truth == 1:
+                changes[key] = row1
             
+            elif source_of_truth == 2:
+                changes[key] = row2
             
-                
+            else:
+                pass
+            
+    elif isinstance(deltas[0][1], list) and isinstance(deltas[0][2], list):
+        for change_row in deltas:
+            key = change_row[0]
+            row1 = change_row[1]
+            row2 = change_row[2]
 
-            updates = []
-            errors = []
-            for datePair in updatedComparision:
-                if not isinstance(datePair[0], datetime.datetime) or not isinstance(datePair[1], datetime.datetime):
-                    Log.log_error(f"The values of the updated keys must be datetime.datetim objects. No decision will be made for this key", f"provided types: {type(datePair[0])} -- {type(datePair[1])}")
-                    errors.append()
-
-                if datePair[0]
-
-            updates = map(lambda x: 0 if x[0] > x[1] else 1, updatedComparision)
-
-
-
-    elif isinstance(collection1, list) and isinstance(collection2, list):
-        if source_of_truth == 0:
-            for index in deltas:
-                collection1[index]
-        
+            if source_of_truth == 1:
+                changes[key] = row1
+            
+            elif source_of_truth == 2:
+                changes[key] = row2
+            
+            else:
+                pass
+            
+    else:
+        Log.log_error(f"improper types for collection1 and collection2. They must be both dics or lists.", f"Type collection1: {type()}")
     
+    return Log, changes
 
 def detect_deltas(collection1: list|dict, collection2: list|dict, error_threshold: int = 10) -> tuple[aolog.AoLog, list, list]:
     Log = aolog.AoLog()
